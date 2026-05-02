@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>50-Question Quiz – REST & State Management</title>
+    <title>Quiz – REST & State Management</title>
     <style>
         :root {
             --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -938,11 +938,11 @@
             const r = document.getElementById('root');
             r.innerHTML = `
         <div class="start-wrap">
-          <div class="start-title">50-question quiz</div>
+          <div class="start-title">Quiz</div>
           <div class="start-sub">Filter by topic or difficulty, then start. Mark questions as "known" to skip them in future rounds.</div>
           <div class="stat-grid">
-            <div class="stat-card"><div class="stat-n">50</div><div class="stat-l">total questions</div></div>
-            <div class="stat-card"><div class="stat-n">7</div><div class="stat-l">topics</div></div>
+            <div class="stat-card"><div class="stat-n">${ALL.length}</div><div class="stat-l">total questions</div></div>
+            <div class="stat-card"><div class="stat-n">${topics.length}</div><div class="stat-l">topics</div></div>
             <div class="stat-card"><div class="stat-n">3</div><div class="stat-l">difficulty levels</div></div>
             <div class="stat-card"><div class="stat-n">${knCount}</div><div class="stat-l">marked known</div></div>
           </div>
