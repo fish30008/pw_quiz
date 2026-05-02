@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>50-Question Quiz – REST & State Management</title>
+    <style>
+        :root {
+            --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+            --color-text-primary: #1a1a2e;
+            --color-text-secondary: #555;
+            --color-text-tertiary: #888;
+            --color-background-primary: #fff;
+            --color-background-secondary: #f5f5f8;
+            --color-border-tertiary: #e0e0e6;
+            --color-border-secondary: #c5c5d0;
+            --border-radius-md: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            background: #fafafa;
+        }
+        .wrap {
+            max-width: 680px;
+            margin: 0 auto;
+            padding: 1.5rem 1rem;
+            font-family: var(--font-sans);
+        }
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .prog-bar {
+            height: 4px;
+            background: var(--color-border-tertiary);
+            border-radius: 2px;
+            margin-bottom: 1.5rem;
+        }
+        .prog-fill {
+            height: 4px;
+            background: #7F77DD;
+            border-radius: 2px;
+            transition: width 0.4s;
+        }
+        .q-meta {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            background: var(--color-background-secondary);
+            color: var(--color-text-secondary);
+            border: 0.5px solid var(--color-border-tertiary);
+        }
+        .diff-e {
+            background: #EAF3DE;
+            color: #3B6D11;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .diff-m {
+            background: #FAEEDA;
+            color: #854F0B;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .diff-h {
+            background: #FCEBEB;
+            color: #A32D2D;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        .q-num {
+            font-size: 12px;
+            color: var(--color-text-tertiary);
+            letter-spacing: .05em;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .q-text {
+            font-size: 16px;
+            color: var(--color-text-primary);
+            font-weight: 500;
+            line-height: 1.5;
+            margin-bottom: 1.25rem;
+        }
+        .opts {
+            display: flex;
+            flex-direction: column;
+            gap: 9px;
+        }
+        .opt {
+            display: flex;
+            align-items: flex-start;
+            gap: 11px;
+            padding: 11px 13px;
+            border: 0.5px solid var(--color-border-tertiary);
+            border-radius: var(--border-radius-md);
+            cursor: pointer;
+            background: var(--color-background-primary);
+            transition: border-color .15s, background .15s;
+        }
+        .opt:hover {
+            border-color: var(--color-border-secondary);
+            background: var(--color-background-secondary);
+        }
+        .opt.correct {
+            border-color: #1D9E75;
+            background: #E1F5EE;
+        }
+        .opt.wrong {
+            border-color: #E24B4A;
+            background: #FCEBEB;
+        }
+        .opt.show-correct {
+            border-color: #1D9E75;
+            background: #E1F5EE;
+        }
+        .ltr {
+            font-size: 11px;
+            font-weight: 500;
+            min-width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 4px;
+            background: var(--color-background-secondary);
+            color: var(--color-text-secondary);
+            border: 0.5px solid var(--color-border-tertiary);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+        .opt.correct .ltr {
+            background: #1D9E75;
+            color: #fff;
+            border-color: #1D9E75;
+        }
+        .opt.wrong .ltr {
+            background: #E24B4A;
+            color: #fff;
+            border-color: #E24B4A;
+        }
+        .opt.show-correct .ltr {
+            background: #1D9E75;
+            color: #fff;
+            border-color: #1D9E75;
+        }
+        .opt-txt {
+            font-size: 14px;
+            color: var(--color-text-primary);
+            line-height: 1.4;
+        }
+        .exp {
+            margin-top: 1rem;
+            padding: 13px;
+            border-radius: var(--border-radius-md);
+            background: var(--color-background-secondary);
+            border-left: 3px solid #7F77DD;
+            font-size: 13px;
+            color: var(--color-text-secondary);
+            line-height: 1.6;
+            display: none;
+        }
+        .exp strong {
+            color: var(--color-text-primary);
+            font-weight: 500;
+        }
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1.25rem;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .footer-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .score-chip {
+            font-size: 13px;
+            color: var(--color-text-secondary);
+        }
+        button.next {
+            padding: 8px 18px;
+            border-radius: var(--border-radius-md);
+            border: 0.5px solid #534AB7;
+            background: #534AB7;
+            color: #fff;
+            font-size: 14px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        button.next:hover {
+            background: #3C3489;
+        }
+        button.next:disabled {
+            opacity: .35;
+            cursor: default;
+        }
+        button.sec {
+            padding: 8px 16px;
+            border-radius: var(--border-radius-md);
+            border: 0.5px solid var(--color-border-secondary);
+            background: transparent;
+            color: var(--color-text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        button.sec:hover {
+            background: var(--color-background-secondary);
+        }
+
+        /* Known toggle button */
+        button.know-btn {
+            padding: 6px 12px;
+            border-radius: var(--border-radius-md);
+            border: 0.5px solid var(--color-border-tertiary);
+            background: transparent;
+            color: var(--color-text-secondary);
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        button.know-btn:hover {
+            border-color: #7F77DD;
+            color: #534AB7;
+            background: #f8f7ff;
+        }
+        button.know-btn.is-known {
+            background: #E1F5EE;
+            border-color: #1D9E75;
+            color: #0F6E56;
+            font-weight: 500;
+        }
+        button.know-btn.is-known:hover {
+            background: #FCEBEB;
+            border-color: #E24B4A;
+            color: #A32D2D;
+        }
+        button.know-btn .know-icon {
+            font-size: 13px;
+            line-height: 1;
+        }
+
+        /* Known indicator dot */
+        .known-dot {
+            display: inline-block;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #1D9E75;
+            flex-shrink: 0;
+            margin-right: 2px;
+            vertical-align: middle;
+        }
+
+        .score-wrap {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .big-score {
+            font-size: 54px;
+            font-weight: 500;
+            color: var(--color-text-primary);
+        }
+        .score-sub {
+            font-size: 15px;
+            color: var(--color-text-secondary);
+            margin-top: 6px;
+            margin-bottom: 1.5rem;
+        }
+        .breakdown {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            margin-bottom: 1.5rem;
+        }
+        .bd-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 13px;
+            padding: 8px 12px;
+            border-radius: var(--border-radius-md);
+            background: var(--color-background-secondary);
+            gap: 8px;
+            cursor: pointer;
+            transition: background 0.15s;
+        }
+        .bd-row:hover {
+            background: #ececf2;
+        }
+        .bd-row.is-known-row {
+            border-left: 3px solid #1D9E75;
+        }
+        .bd-q {
+            color: var(--color-text-secondary);
+            text-align: left;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .badge-ok {
+            background: #E1F5EE;
+            color: #0F6E56;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .badge-no {
+            background: #FCEBEB;
+            color: #A32D2D;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 500;
+            flex-shrink: 0;
+        }
+        .badge-known {
+            background: #E1F5EE;
+            color: #0F6E56;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 500;
+            flex-shrink: 0;
+            letter-spacing: .03em;
+        }
+        .filter-bar {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        .filter-btn {
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 4px;
+            border: 0.5px solid var(--color-border-secondary);
+            background: transparent;
+            color: var(--color-text-secondary);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .filter-btn.active {
+            background: #534AB7;
+            color: #fff;
+            border-color: #534AB7;
+        }
+        .filter-btn.known-active {
+            background: #1D9E75;
+            color: #fff;
+            border-color: #1D9E75;
+        }
+        .start-wrap {
+            text-align: center;
+            padding: 2rem 0;
+        }
+        .start-title {
+            font-size: 20px;
+            font-weight: 500;
+            color: var(--color-text-primary);
+            margin-bottom: 8px;
+        }
+        .start-sub {
+            font-size: 14px;
+            color: var(--color-text-secondary);
+            margin-bottom: 1.5rem;
+        }
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .stat-card {
+            background: var(--color-background-secondary);
+            border-radius: var(--border-radius-md);
+            padding: 12px;
+            text-align: center;
+        }
+        .stat-n {
+            font-size: 24px;
+            font-weight: 500;
+            color: var(--color-text-primary);
+        }
+        .stat-l {
+            font-size: 12px;
+            color: var(--color-text-secondary);
+            margin-top: 2px;
+        }
+        .reset-link {
+            font-size: 12px;
+            color: var(--color-text-tertiary);
+            cursor: pointer;
+            text-decoration: underline;
+            margin-top: 8px;
+            display: inline-block;
+        }
+        .reset-link:hover {
+            color: #E24B4A;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a2e;
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 13px;
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            font-family: var(--font-sans);
+        }
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrap" id="root"></div>
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const ALL = [
+            { t: "REST basics", d: "easy",
+                q: "What does REST stand for?",
+                o: ["Remote Execution State Transfer", "Representational State Transfer",
+                    "Resource Endpoint Standard Transport", "Reactive Event Stream Technology"
+                ], c: 1,
+                e: "<strong>Representational State Transfer</strong> — an architectural style coined by Roy Fielding. It is not a protocol; it is a set of constraints for designing networked APIs."
+            },
+            { t: "REST basics", d: "easy", q: "In REST, what do URLs represent?",
+                o: ["Actions to perform", "Functions to call", "Resources (nouns)", "Database queries"], c: 2,
+                e: "<strong>URLs identify resources — things, not actions.</strong> /books, /users/5, /orders are all nouns. If you put a verb in the URL (e.g. /getBooks), you've shifted toward RPC, not REST."
+            },
+            { t: "REST basics", d: "easy", q: "Which HTTP method is used to create a new resource in REST?",
+                o: ["GET", "PUT", "POST", "PATCH"], c: 2,
+                e: "<strong>POST /collection</strong> is the standard way to create a new resource. The server assigns the ID and returns 201 Created with the new resource's location."
+            },
+            { t: "REST basics", d: "easy", q: "Which HTTP method replaces an entire resource?",
+                o: ["PATCH", "POST", "GET", "PUT"], c: 3,
+                e: "<strong>PUT</strong> replaces the entire resource. If you send PUT /books/5 with a partial body, missing fields are removed or reset. PATCH is for partial updates only."
+            },
+            { t: "REST basics", d: "easy", q: "What is the correct REST route to get a single book with ID 7?",
+                o: ["GET /books/getById?id=7", "GET /books/fetch/7", "GET /books/7", "POST /books/7"], c: 2,
+                e: "<strong>GET /books/7</strong> — the resource identifier is part of the path. GET is read-only and must have no side effects."
+            },
+            { t: "REST basics", d: "medium", q: "What distinguishes PUT from PATCH?", o: [
+                    "PUT is used for creating, PATCH for updating",
+                    "PUT replaces the whole resource; PATCH applies a partial update",
+                    "PUT requires authentication; PATCH does not",
+                    "PUT is idempotent; PATCH always creates a new version"
+                ], c: 1,
+                e: "<strong>PUT = full replacement, PATCH = partial update.</strong> Both are idempotent in practice. If you send PATCH with only {email}, only the email changes. If you send PUT with only {email}, all other fields are wiped."
+            },
+            { t: "HTTP status codes", d: "easy",
+                q: "What HTTP status code should a successful POST (resource created) return?",
+                o: ["200 OK", "204 No Content", "201 Created", "202 Accepted"], c: 2,
+                e: "<strong>201 Created</strong> signals that the request succeeded and a new resource was created. The response should include a Location header pointing to the new resource."
+            },
+            { t: "HTTP status codes", d: "easy", q: "What does HTTP 204 mean?", o: [
+                    "The request was redirected", "The resource was not found",
+                    "Success, but there is no body to return", "The server encountered an error"
+                ], c: 2,
+                e: "<strong>204 No Content</strong> — success, nothing to return. Commonly used for DELETE responses where there's no body to send back."
+            },
+            { t: "HTTP status codes", d: "easy",
+                q: "A client sends a request with a missing or expired JWT. Which status code is correct?",
+                o: ["400 Bad Request", "403 Forbidden", "404 Not Found", "401 Unauthorized"], c: 3,
+                e: "<strong>401 Unauthorized</strong> means authentication failed — no valid token was provided. 403 means a valid token exists but the user lacks permission. The naming is historically confusing, but the distinction matters."
+            },
+            { t: "HTTP status codes", d: "easy",
+                q: "A user tries to register with an email that already exists. What status code fits best?",
+                o: ["400 Bad Request", "409 Conflict", "403 Forbidden", "500 Internal Server Error"], c: 1,
+                e: "<strong>409 Conflict</strong> — a state conflict exists (duplicate unique field). 400 is for malformed input like a missing field or wrong type. 409 is specifically for logical conflicts with existing data."
+            },
+            { t: "HTTP status codes", d: "medium",
+                q: "What is the main operational problem with always returning 200 and putting error info in the body?",
+                o: ["It wastes bandwidth",
+                    "Monitoring tools, gateways, and load balancers read HTTP status codes — they cannot detect failures if everything is 200",
+                    "It breaks CORS preflight", "It forces clients to use XML parsers"
+                ], c: 1,
+                e: "<strong>Infrastructure reads HTTP codes, not JSON bodies.</strong> If everything is 200, your alerting, your API gateway, your load balancer — none of them know requests are failing. Clients also have to parse every body just to check success."
+            },
+            { t: "HTTP status codes", d: "medium",
+                q: "When is it intentional (and defensible) to return 404 for an authorization failure?",
+                o: ["When the server is under load",
+                    "When you want to hide that the resource exists at all — security by obscurity",
+                    "When the JWT is expired", "When pagination is not implemented"
+                ], c: 1,
+                e: "<strong>Returning 404 on unauthorized access prevents resource-existence leakage.</strong> If /admin/users/5 returns 403, an attacker knows user 5 exists. Returning 404 leaks nothing. The cost: legitimate debugging becomes harder because 404 is ambiguous."
+            },
+            { t: "HTTP status codes", d: "hard",
+                q: "A server returns 500 on an unhandled exception. What should a well-designed API also do alongside this?",
+                o: ["Retry the request automatically",
+                    "Log the error server-side and return a generic error message to the client — never expose stack traces",
+                    "Return the full stack trace in the response body for debugging",
+                    "Return 200 with an error field to avoid alarming monitoring tools"
+                ], c: 1,
+                e: "<strong>Log details internally, return a generic message externally.</strong> Stack traces expose internal structure — file paths, library versions, SQL schema — to potential attackers. Return something like { error: 'Internal server error' } and log everything server-side."
+            },
+            { t: "Common mistakes", d: "easy", q: "Which of these URLs violates REST naming conventions?",
+                o: ["GET /users", "DELETE /users/5", "POST /users/create", "PATCH /users/5"], c: 2,
+                e: "<strong>POST /users/create</strong> puts a verb in the URL. In REST, the HTTP method (POST) carries the action. The URL should just be the noun: POST /users."
+            },
+            { t: "Common mistakes", d: "easy",
+                q: "Why is 'GET /deleteUser?id=5' a dangerous route design?", o: [
+                    "Query parameters are forbidden in REST",
+                    "GET requests are automatically repeated by browsers, caches, and crawlers — deleting data via GET can be triggered accidentally",
+                    "GET is slower than DELETE", "It violates the plural naming convention"
+                ], c: 1,
+                e: "<strong>GET must have no side effects.</strong> Browsers prefetch, crawlers follow, caches replay GET URLs. Using GET for a destructive operation means data can be deleted without explicit user intent."
+            },
+            { t: "Common mistakes", d: "medium",
+                q: "Your API uses /getUsers, /user/5, /Users/create, and /USER-LIST. What is wrong?",
+                o: ["The routes use too many HTTP verbs",
+                    "The naming is inconsistent — mixed case, mixed plural/singular, verbs in paths",
+                    "The routes are too short", "Hyphens are not allowed in REST URLs"
+                ], c: 1,
+                e: "<strong>Consistency is a REST convention.</strong> Pick one scheme and apply it everywhere: lowercase, plural nouns, hyphens for multi-word segments. Mixed conventions make the API unpredictable and harder to document."
+            },
+            { t: "Common mistakes", d: "medium",
+                q: "What is the maximum recommended nesting depth for REST routes?", o: [
+                    "Five levels", "One level", "Two levels", "No limit — REST allows unlimited nesting"
+                ], c: 2,
+                e: "<strong>Two levels is the practical limit.</strong> /posts/12/comments is fine. /users/5/posts/12/comments/8/likes/3 is unmaintainable and breaks when resources are reorganized. Flatten: GET /likes/3 or GET /comments/8/likes."
+            },
+            { t: "Common mistakes", d: "hard",
+                q: "A client sends POST /users and the server creates the user but returns 200 instead of 201. What practical problem does this cause?",
+                o: ["The client's JWT expires faster",
+                    "Clients and tools that rely on 201 to confirm creation — such as API clients that auto-follow Location headers — won't work correctly",
+                    "POST with 200 triggers a browser form resubmission",
+                    "It causes a 409 on the next request"
+                ], c: 1,
+                e: "<strong>201 is the contract for creation.</strong> Some API clients, reverse proxies, and automation tools use the status code semantically. Returning 200 for creation breaks that contract — tools expecting a Location header to redirect to the new resource won't get it."
+            },
+            { t: "REST vs other approaches", d: "easy", q: "What characterizes an RPC-style API?",
+                o: ["One URL per resource, actions via HTTP verbs",
+                    "Multiple endpoints, each named after an action (e.g. /getUser, /deleteUser)",
+                    "A single /graphql endpoint", "XML-only payloads"
+                ], c: 1,
+                e: "<strong>RPC encodes actions in the URL or body.</strong> Every operation gets its own endpoint. There's no standard structure — each API invents its own conventions. It works, but clients can't make any assumptions about behavior."
+            },
+            { t: "REST vs other approaches", d: "medium",
+                q: "What type of organizations still commonly use SOAP APIs?", o: [
+                    "Startups and consumer apps", "Gaming platforms",
+                    "Banking, insurance, and government integrations", "GraphQL-heavy companies"
+                ], c: 2,
+                e: "<strong>SOAP remains prevalent in banking, insurance, and government.</strong> Its verbosity is a feature: strict XML contracts, built-in validation via WSDL, and decades of tooling. Many legacy financial systems cannot be migrated easily."
+            },
+            { t: "REST vs other approaches", d: "medium",
+                q: "What is a key advantage of GraphQL over REST for frontend clients?", o: [
+                    "GraphQL responses are always faster",
+                    "The client defines the exact shape of the response — no over-fetching or under-fetching",
+                    "GraphQL automatically caches responses using HTTP",
+                    "GraphQL requires no server-side schema"
+                ], c: 1,
+                e: "<strong>Client-defined queries eliminate over- and under-fetching.</strong> In REST, /users/5 returns all fields whether you need them or not. In GraphQL, you specify exactly: { user(id:5) { name email } }. One query can also resolve multiple resources at once."
+            },
+            { t: "REST vs other approaches", d: "hard",
+                q: "Why does GraphQL not benefit from standard HTTP caching out of the box?",
+                o: ["GraphQL responses are always in XML",
+                    "GraphQL uses WebSockets, not HTTP",
+                    "All GraphQL queries go through POST to a single endpoint — HTTP caching is built around GET requests with distinct URLs",
+                    "GraphQL requires authentication, which disables caching"
+                ], c: 2,
+                e: "<strong>HTTP caching keys on GET + URL.</strong> CDNs, browser caches, and proxies cache responses per URL. Since every GraphQL query is a POST to /graphql, there's no URL uniqueness to cache on. You need a custom strategy: persisted queries, Apollo Client's normalized cache, or edge caching workarounds."
+            },
+            { t: "Pagination", d: "easy",
+                q: "Why should every real API implement pagination?", o: [
+                    "HTTP limits responses to 1 MB",
+                    "Returning all records in one response doesn't scale — it overloads the server and client",
+                    "REST requires pagination by specification", "Pagination is needed for JWT to work"
+                ], c: 1,
+                e: "<strong>Unbounded queries don't scale.</strong> Returning all 10,000 records serializes them, transfers them, and forces the client to process them all at once. Pagination limits work per request and makes the API predictable under load."
+            },
+            { t: "Pagination", d: "easy",
+                q: "In offset-based pagination, what does 'GET /books?limit=10&offset=20' return?",
+                o: ["The first 20 books", "Books 21–30 (the third page)", "Books 10–20",
+                    "All books after ID 20"
+                ], c: 1,
+                e: "<strong>offset=20 skips the first 20 records, limit=10 returns the next 10</strong> — that's records 21–30, the third page. The first page is offset=0, the second is offset=10, and so on."
+            },
+            { t: "Pagination", d: "medium",
+                q: "What metadata should a paginated API response include alongside the data array?",
+                o: ["Only a next_page URL",
+                    "The total count, limit, and offset (or cursor), so clients can calculate remaining pages",
+                    "The full dataset compressed into a separate field",
+                    "The server's current memory usage"
+                ], c: 1,
+                e: "<strong>Metadata lets clients calculate pages.</strong> Without 'total', the client doesn't know if there are more records. A response should include: { data: [...], total: 243, limit: 10, offset: 0 }."
+            },
+            { t: "Pagination", d: "hard",
+                q: "When is cursor-based pagination preferred over offset-based?", o: [
+                    "When the dataset has fewer than 100 records",
+                    "When the data changes frequently (inserts/deletes) — offset pagination produces inconsistent pages under live data",
+                    "When the client needs to jump to an arbitrary page number",
+                    "When the API is used over WebSockets"
+                ], c: 1,
+                e: "<strong>Offset pagination breaks under live data.</strong> If records are inserted or deleted between requests, the offsets shift — items appear twice or are skipped. Cursor-based pagination encodes a stable position in the dataset, so it's consistent regardless of concurrent writes."
+            },
+            { t: "JWT", d: "easy", q: "What are the three parts of a JWT?", o: [
+                    "Username, password, and session ID", "Header, payload, and signature",
+                    "Token, secret, and expiration", "Method, resource, and claims"
+                ], c: 1,
+                e: "<strong>Header.Payload.Signature</strong> — each base64url-encoded, joined by dots. The header describes the algorithm, the payload holds claims (user ID, role, exp), and the signature proves the token hasn't been tampered with."
+            },
+            { t: "JWT", d: "easy", q: "What HTTP header is used to send a JWT to a server?",
+                o: ["X-Auth-Token: Bearer <token>", "Cookie: jwt=<token>",
+                    "Authorization: Bearer <token>", "Content-Type: application/jwt"
+                ], c: 2,
+                e: "<strong>Authorization: Bearer &lt;token&gt;</strong> is the standard. The server reads this header on every request, verifies the signature, checks exp, and extracts claims — no database lookup needed."
+            },
+            { t: "JWT", d: "easy", q: "Is the JWT payload encrypted?", o: [
+                    "Yes, it uses AES-256 by default",
+                    "No — it is base64url-encoded, meaning anyone can decode and read it",
+                    "Yes, but only when sent over HTTPS",
+                    "Only the signature is encrypted; the payload is plaintext"
+                ], c: 1,
+                e: "<strong>Base64url is encoding, not encryption.</strong> Anyone who intercepts or possesses the token can decode the payload with zero effort. Never put sensitive data — passwords, credit card numbers, PII — in the JWT payload. It's visible."
+            },
+            { t: "JWT", d: "medium", q: "What is the difference between JWT verify() and decode()?",
+                o: ["decode() checks the signature; verify() only reads the payload",
+                    "verify() checks the signature and validates exp; decode() just reads the payload with no validation",
+                    "They are identical — decode is an alias for verify",
+                    "verify() requires HTTPS; decode() works over HTTP"
+                ], c: 1,
+                e: "<strong>verify() = decode + validate signature + check exp.</strong> If you use decode(), an attacker can send an expired token or a forged token and it will be accepted. Always call verify() on the server. The library will throw on invalid or expired tokens."
+            },
+            { t: "JWT", d: "medium",
+                q: "For a lab demo, the instructor says to set exp to 'iat + 60'. What does this mean?",
+                o: ["The token expires in 60 days", "The token is valid for 60 minutes",
+                    "The token expires 60 seconds after it was issued", "The token has 60 retry attempts"
+                ], c: 2,
+                e: "<strong>iat is 'issued at' (Unix timestamp), so iat + 60 = expires in 60 seconds.</strong> This short expiry lets you demonstrate what happens when a client sends an expired token — the server should return 401."
+            },
+            { t: "JWT", d: "hard",
+                q: "Why is storing a JWT in localStorage considered a security risk?", o: [
+                    "localStorage is limited to 4KB and JWTs are too large",
+                    "localStorage is cleared on logout, creating a dangling session",
+                    "Any JavaScript on the page — including XSS-injected scripts — can read localStorage and steal the token",
+                    "localStorage is not available in mobile browsers"
+                ], c: 2,
+                e: "<strong>XSS can read localStorage.</strong> If an attacker injects a script into your page, they can call localStorage.getItem('token') and send it anywhere. An HttpOnly cookie cannot be read by JS at all — it's immune to this attack. Use HttpOnly cookies for JWT storage."
+            },
+            { t: "JWT", d: "hard",
+                q: "A developer puts the user's full name, email, home address, and salary in the JWT payload 'for convenience'. What is the risk?",
+                o: ["The JWT will be too large to fit in a cookie",
+                    "Because the payload is only base64-encoded, anyone who obtains the token can read all that data — it is not private",
+                    "The server won't be able to parse the extra fields",
+                    "The JWT signature will fail because of the extra fields"
+                ], c: 1,
+                e: "<strong>JWT payloads are readable by anyone with the token.</strong> Decode the token on jwt.io right now — you'll see the raw payload. Only put non-sensitive identifiers in the payload: user ID, role, permissions. Nothing a user shouldn't see."
+            },
+            { t: "REST basics", d: "medium",
+                q: "Which two constraints matter most practically for a RESTful API?", o: [
+                    "Stateless + cacheable", "Resources are nouns + HTTP verbs carry the action",
+                    "Uniform interface + layered system", "Client-server + code on demand"
+                ], c: 1,
+                e: "<strong>Nouns in URLs + verbs via HTTP methods</strong> are the two constraints that define REST in practice. If you follow these, the rest (statelessness, cacheability) tends to follow naturally."
+            },
+            { t: "Common mistakes", d: "medium",
+                q: "What is the RESTful equivalent of POST /users/5/delete?", o: [
+                    "GET /users/5/remove", "DELETE /users/5", "POST /users/deleteById",
+                    "PUT /users/5/delete"
+                ], c: 1,
+                e: "<strong>DELETE /users/5</strong> — the HTTP verb carries the action. There is no need for /delete in the path. POST /users/5/delete puts both a verb and an ID in an awkward position and uses the wrong method."
+            },
+            { t: "State management", d: "easy", q: "What does React's useState hook do?", o: [
+                    "Shares state across the entire component tree",
+                    "Stores state in localStorage automatically",
+                    "Creates local component state that triggers a re-render when updated",
+                    "Fetches data from an API on mount"
+                ], c: 2,
+                e: "<strong>useState creates local state in a component.</strong> When you call setState, React re-renders only that component (and its children). It's the simplest state primitive — use it for UI toggles, form values, and other component-local data."
+            },
+            { t: "State management", d: "easy", q: "What is Pinia in the Vue ecosystem?", o: [
+                    "A CSS framework for Vue", "The official Vue router",
+                    "Vue's official state management library, replacing Vuex",
+                    "A testing utility for Vue components"
+                ], c: 2,
+                e: "<strong>Pinia is the official Vue state library</strong> (since Vue 3). It replaced Vuex as the recommended solution. It drops the Vuex 'mutations' layer, has first-class TypeScript support, and each store is modular and independent."
+            },
+            { t: "State management", d: "easy", q: "What is Zustand in the React ecosystem?",
+                o: ["A CSS-in-JS library",
+                    "A minimal React state management library requiring no Provider wrapper",
+                    "The official React state solution from the React team",
+                    "A server-side rendering framework"
+                ], c: 1,
+                e: "<strong>Zustand is a minimal, no-ceremony state library for React.</strong> No Provider, no boilerplate. You create a store with create(), use selector subscriptions for performance, and it works outside React too. Popular choice for small-to-medium apps."
+            },
+            { t: "State management", d: "medium",
+                q: "What is the limitation of useContext for high-frequency state?", o: [
+                    "useContext only supports primitive values", "useContext requires Redux to function",
+                    "Every consumer re-renders when context value changes — there is no selector mechanism to prevent unnecessary renders",
+                    "useContext is deprecated in React 18"
+                ], c: 2,
+                e: "<strong>No fine-grained subscriptions.</strong> If ThemeContext updates, every component consuming it re-renders — even if it only uses one field that didn't change. For high-frequency state like form fields or lists, this causes widespread unnecessary renders. Zustand/Pinia solve this with selector-based subscriptions."
+            },
+            { t: "State management", d: "medium",
+                q: "What does useReducer offer over useState in React?", o: [
+                    "It is faster because it uses Web Workers", "It connects to Redux automatically",
+                    "It centralizes complex state logic into a pure reducer function, making state transitions explicit and testable",
+                    "It stores state in sessionStorage"
+                ], c: 2,
+                e: "<strong>useReducer handles complex state transitions.</strong> Instead of multiple useState calls that can get out of sync, you describe all possible transitions in a reducer. Dispatch an action, the reducer computes the next state. Easier to test and reason about for multi-step logic."
+            },
+            { t: "State management", d: "medium", q: "What is RTK Query best suited for?", o: [
+                    "Managing local UI state like modals and toggles", "Client-side routing",
+                    "Fetching, caching, and synchronizing server data — replacing manual loading/error state boilerplate",
+                    "Replacing Redux entirely for all state"
+                ], c: 2,
+                e: "<strong>RTK Query is a data-fetching and caching layer</strong> built into Redux Toolkit. It auto-generates hooks, handles loading/error states, caches responses, and invalidates cache on mutations. It replaces patterns like manually writing isLoading booleans and useEffect API calls."
+            },
+            { t: "State management", d: "medium",
+                q: "What was the main criticism of vanilla Redux?", o: [
+                    "It only worked with class components", "It was too slow for production use",
+                    "It required enormous boilerplate — separate files for actions, action creators, reducers, and selectors",
+                    "It didn't support async operations at all"
+                ], c: 2,
+                e: "<strong>Boilerplate was Redux's biggest pain point.</strong> To add one feature you'd write: an action type constant, an action creator function, a reducer case, and a selector — often across four files. Redux Toolkit (RTK) was created specifically to eliminate this with createSlice."
+            },
+            { t: "State management", d: "hard",
+                q: "What is the core architectural guarantee of the Flux unidirectional data flow?",
+                o: ["State is persisted to localStorage automatically",
+                    "Components can read and write state directly for performance",
+                    "Every state change comes from an explicit dispatched action — making state transitions traceable, loggable, and replayable",
+                    "All API calls are batched into a single round trip"
+                ], c: 2,
+                e: "<strong>Unidirectional flow makes state changes explicit and auditable.</strong> Action → Dispatcher → Store → View. No component can mutate state silently. You can log every action, replay them for time-travel debugging, and know exactly what caused any state change."
+            },
+            { t: "State management", d: "hard",
+                q: "What is the key difference between NgRx Signal Store and classic NgRx Store?",
+                o: ["Signal Store only works in Angular 16 and below", "Signal Store requires RxJS 8",
+                    "Signal Store is built around Angular Signals instead of RxJS Observables — significantly less boilerplate and no RxJS dependency for state",
+                    "Signal Store does not support side effects"
+                ], c: 2,
+                e: "<strong>NgRx Signal Store drops RxJS as the reactivity primitive</strong> for state. Classic NgRx uses Observables throughout (actions, reducers, effects, selectors — all streams). Signal Store uses Angular Signals, which are synchronous and simpler. Much less boilerplate and the direction Angular state management is heading."
+            },
+            { t: "State management", d: "hard",
+                q: "What does 'fine-grained reactivity' mean in the context of Signals?",
+                o: ["The component tree re-renders completely on every signal update",
+                    "Only the exact expression or component that reads a signal re-renders when that signal changes — no selector optimization needed",
+                    "Signals batch all updates and re-render once per animation frame",
+                    "Fine-grained means signals only work with primitive values, not objects"
+                ], c: 1,
+                e: "<strong>The runtime tracks which UI expressions depend on which signals.</strong> When a signal changes, only the exact reads that depend on it update — not the whole component, not the whole subtree. This is fundamentally different from Redux (where selectors must be memoized to avoid over-rendering) or Context (where all consumers re-render)."
+            },
+            { t: "State management", d: "hard",
+                q: "Why is Pinia considered simpler than Vuex?", o: [
+                    "Pinia uses REST under the hood instead of events",
+                    "Pinia removes the mutations layer — actions can be async directly, reducing the number of concepts from three layers to two",
+                    "Pinia stores state in localStorage automatically",
+                    "Pinia does not support TypeScript"
+                ], c: 1,
+                e: "<strong>Vuex had three layers: state, mutations (sync only), actions (async).</strong> To update state asynchronously in Vuex, you'd dispatch an action, which commits a mutation, which updates state — three hops. Pinia collapses this: actions can be async directly. Plus first-class TypeScript, devtools, and modular stores by default."
+            },
+            { t: "State management", d: "medium",
+                q: "In Angular, what is the recommended modern alternative to BehaviorSubject services for state?",
+                o: ["useReducer from React", "NgRx classic store with RxJS",
+                    "Angular Signals (signal() and computed()) inside injectable services",
+                    "Vue's ref() ported to Angular"
+                ], c: 2,
+                e: "<strong>Signals are Angular's modern state primitive (Angular 17+).</strong> An injectable service with signal() and computed() gives you reactive, fine-grained state without RxJS. For small-to-medium apps, this is often all you need — no NgRx overhead required."
+            },
+            { t: "State management", d: "easy",
+                q: "Which state library is described as 'Vuex, but legacy'?", o: ["Pinia", "NgRx", "Zustand",
+                    "Redux Toolkit"
+                ], c: 0,
+                e: "<strong>Pinia won — Vuex is legacy.</strong> Pinia became the official Vue state library. Vuex is still maintained but new Vue projects should use Pinia. The Vue core team now recommends Pinia in all documentation."
+            },
+            { t: "REST basics", d: "hard",
+                q: "A client sends GET /books repeatedly and gets different results each time because new books are added. Does this violate REST?",
+                o: ["Yes — REST requires GET responses to be identical every time",
+                    "No — GET must be safe (no side effects) and idempotent in effect, but responses can change as the underlying resource changes",
+                    "Yes — GET must be cacheable, so results must be static",
+                    "No — REST has no rules about GET response consistency"
+                ], c: 1,
+                e: "<strong>GET must be safe (no side effects) — idempotency means the same request has the same effect on server state, not the same response body.</strong> /books can return different results as the collection grows. What matters is that calling GET doesn't modify anything."
+            },
+            { t: "HTTP status codes", d: "medium",
+                q: "A user sends malformed JSON in a POST request body. Which status code is appropriate?",
+                o: ["500 Internal Server Error", "404 Not Found", "400 Bad Request",
+                    "401 Unauthorized"
+                ], c: 2,
+                e: "<strong>400 Bad Request</strong> — the client sent invalid data. This covers malformed JSON, missing required fields, wrong data types, and failed validation. The error is the client's fault, not the server's."
+            },
+            { t: "Common mistakes", d: "hard",
+                q: "An API has GET /users?active=true. A developer changes the route to GET /users/getAllActive because it 'reads more clearly'. What REST principle does this violate?",
+                o: ["The route now uses a query parameter incorrectly",
+                    "It violates the principle that URLs are nouns — /getAllActive is a verb phrase, making this RPC-style rather than REST",
+                    "Query parameters are not allowed for filtering in REST",
+                    "GET is not allowed with boolean parameters"
+                ], c: 1,
+                e: "<strong>REST URLs are nouns.</strong> /users?active=true is correct REST — you're requesting the /users resource filtered by a query parameter. /getAllActive is a verb phrase encoding the action in the URL, which is RPC-style. The query string is the right place for filtering, sorting, and field selection."
+            },
+            { t: "JWT", d: "medium",
+                q: "What happens if a JWT's exp claim is in the past and the server calls verify()?",
+                o: ["The server ignores exp and processes the request normally", "The library returns null",
+                    "The library throws a TokenExpiredError — the server should catch it and return 401",
+                    "The server automatically refreshes the token"
+                ], c: 2,
+                e: "<strong>verify() throws on expired tokens.</strong> Your server code should wrap the verify() call in a try/catch. On TokenExpiredError (or equivalent), return 401 Unauthorized. The client must then re-authenticate to get a fresh token."
+            },
+            { t: "REST vs other approaches", d: "hard",
+                q: "Why is GraphQL's per-field authorization described as 'complex'?", o: [
+                    "GraphQL doesn't support authentication headers",
+                    "Every field resolver must independently check permissions — unlike REST where you can authorize at the route level",
+                    "GraphQL uses role-based access control that conflicts with JWT",
+                    "Field-level authorization requires a separate microservice"
+                ], c: 1,
+                e: "<strong>In REST, you authorize at the route level: one middleware check per endpoint.</strong> In GraphQL, a single query can request fields from many types. Each resolver may need its own permission check. Returning partial data (some fields allowed, some not) requires careful design — there's no standard approach, and it's easy to accidentally leak data."
+            }
+        ];
+
+        // ── Known questions – localStorage ────────────────────────────
+        const STORAGE_KEY = 'quiz_known_texts';
+
+        function loadKnown() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) {
+                    const arr = JSON.parse(raw);
+                    return new Set(arr);
+                }
+            } catch (e) {
+                // localStorage unavailable or corrupted – silently start fresh
+            }
+            return new Set();
+        }
+
+        function saveKnown(set) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
+            } catch (e) {
+                // storage full or unavailable – ignore
+            }
+        }
+
+        let knownTexts = loadKnown();
+        let hideKnown = true; // default: hide known questions from pool
+
+        // ── Toast ──────────────────────────────────────────────────────
+        let toastTimer = null;
+
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            if (!el) return;
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+        }
+
+        // ── State ──────────────────────────────────────────────────────
+        let mode = 'start';
+        let filterTopic = 'all';
+        let filterDiff = 'all';
+        let pool = [];
+        let cur = 0;
+        let answered = false;
+        let score = 0;
+        let results = [];
+
+        function getPool() {
+            let filtered = ALL.filter(q =>
+                (filterTopic === 'all' || q.t === filterTopic) &&
+                (filterDiff === 'all' || q.d === filterDiff)
+            );
+            if (hideKnown) {
+                filtered = filtered.filter(q => !knownTexts.has(q.q));
+            }
+            return filtered.sort(() => Math.random() - 0.5);
+        }
+
+        function knownCount() {
+            let count = 0;
+            for (const q of ALL) {
+                if (knownTexts.has(q.q)) count++;
+            }
+            return count;
+        }
+
+        const topics = [...new Set(ALL.map(q => q.t))];
+        const diffs = ['easy', 'medium', 'hard'];
+
+        function diffBadge(d) {
+            if (d === 'easy') return `<span class="diff-e">easy</span>`;
+            if (d === 'medium') return `<span class="diff-m">medium</span>`;
+            return `<span class="diff-h">hard</span>`;
+        }
+
+        // ── Render: Start screen ──────────────────────────────────────
+        function renderStart() {
+            const topicCounts = {};
+            topics.forEach(t => topicCounts[t] = ALL.filter(q => q.t === t).length);
+            const knCount = knownCount();
+            const availableCount = getPool().length;
+            const r = document.getElementById('root');
+            r.innerHTML = `
+        <div class="start-wrap">
+          <div class="start-title">50-question quiz</div>
+          <div class="start-sub">Filter by topic or difficulty, then start. Mark questions as "known" to skip them in future rounds.</div>
+          <div class="stat-grid">
+            <div class="stat-card"><div class="stat-n">50</div><div class="stat-l">total questions</div></div>
+            <div class="stat-card"><div class="stat-n">7</div><div class="stat-l">topics</div></div>
+            <div class="stat-card"><div class="stat-n">3</div><div class="stat-l">difficulty levels</div></div>
+            <div class="stat-card"><div class="stat-n">${knCount}</div><div class="stat-l">marked known</div></div>
+          </div>
+          <div style="margin-bottom:8px;font-size:12px;color:var(--color-text-secondary);text-align:left">Filter by topic</div>
+          <div class="filter-bar" id="topic-filters">
+            <button class="filter-btn active" onclick="setTopic('all')">All topics</button>
+            ${topics.map(t=>`<button class="filter-btn" onclick="setTopic('${t.replace(/'/g,"&#39;")}')">${t} (${topicCounts[t]})</button>`).join('')}
+          </div>
+          <div style="margin-bottom:8px;margin-top:12px;font-size:12px;color:var(--color-text-secondary);text-align:left">Filter by difficulty</div>
+          <div class="filter-bar" id="diff-filters">
+            <button class="filter-btn active" onclick="setDiff('all')">All difficulties</button>
+            ${diffs.map(d=>`<button class="filter-btn" onclick="setDiff('${d}')">${d}</button>`).join('')}
+          </div>
+          <div style="margin-bottom:8px;margin-top:12px;font-size:12px;color:var(--color-text-secondary);text-align:left">Known questions</div>
+          <div class="filter-bar" id="known-filters">
+            <button class="filter-btn known-active" id="btn-hide-known" onclick="setHideKnown(true)">Hide known</button>
+            <button class="filter-btn" id="btn-show-all" onclick="setHideKnown(false)">Show all</button>
+          </div>
+          <div style="margin-top:0.5rem;font-size:13px;color:var(--color-text-secondary)" id="q-count"></div>
+          ${knCount > 0 ? `<span class="reset-link" onclick="resetKnown()">Clear all known marks (${knCount} question${knCount===1?'':'s'})</span>` : ''}
+          <div style="margin-top:1rem">
+            <button class="next" onclick="startQuiz()">Start quiz</button>
+          </div>
+          ${availableCount === 0 && hideKnown ? `<div style="margin-top:12px;font-size:13px;color:#A32D2D;">All matching questions are marked as known. Switch to "Show all" or clear known marks above.</div>` : ''}
+        </div>
+      `;
+            updateCount();
+        }
+
+        function updateCount() {
+            const n = getPool().length;
+            const el = document.getElementById('q-count');
+            if (el) {
+                const hiddenNote = hideKnown && knownCount() > 0 ? ` (${knownCount()} known hidden)` : '';
+                el.textContent = n + ' question' + (n === 1 ? '' : 's') + ' match your filters' + hiddenNote;
+            }
+        }
+
+        function setTopic(v) {
+            filterTopic = v;
+            document.querySelectorAll('#topic-filters .filter-btn').forEach(b => b.classList.remove(
+            'active'));
+            const target = document.querySelector(`#topic-filters .filter-btn[onclick="setTopic('${v.replace(/'/g,"&#39;")}')"]`);
+            if (target) target.classList.add('active');
+            updateCount();
+        }
+
+        function setDiff(v) {
+            filterDiff = v;
+            document.querySelectorAll('#diff-filters .filter-btn').forEach(b => b.classList.remove('active'));
+            const target = document.querySelector(`#diff-filters .filter-btn[onclick="setDiff('${v}')"]`);
+            if (target) target.classList.add('active');
+            updateCount();
+        }
+
+        function setHideKnown(v) {
+            hideKnown = v;
+            const btnHide = document.getElementById('btn-hide-known');
+            const btnShow = document.getElementById('btn-show-all');
+            if (btnHide) {
+                if (v) btnHide.classList.add('known-active');
+                else btnHide.classList.remove('known-active');
+            }
+            if (btnShow) {
+                if (!v) btnShow.classList.add('known-active');
+                else btnShow.classList.remove('known-active');
+            }
+            updateCount();
+            // If on start screen, refresh to update the "all known" warning
+            if (mode === 'start') {
+                renderStart();
+            }
+        }
+
+        function resetKnown() {
+            if (knownTexts.size === 0) return;
+            if (!confirm(
+                    `You have ${knownTexts.size} question${knownTexts.size===1?'':'s'} marked as known. Clear all?`
+                    )) return;
+            knownTexts.clear();
+            saveKnown(knownTexts);
+            showToast('All known marks cleared');
+            renderStart();
+        }
+
+        function startQuiz() {
+            pool = getPool();
+            if (!pool.length) {
+                if (hideKnown && knownCount() > 0) {
+                    alert(
+                        'All matching questions are marked as known. Switch to "Show all" or clear known marks to continue.'
+                        );
+                } else {
+                    alert('No questions match your filters.');
+                }
+                return;
+            }
+            cur = 0;
+            score = 0;
+            results = [];
+            answered = false;
+            mode = 'quiz';
+            renderQ();
+        }
+
+        // ── Render: Question ──────────────────────────────────────────
+        function renderQ() {
+            const q = pool[cur];
+            const pct = Math.round(cur / pool.length * 100);
+            const isKnown = knownTexts.has(q.q);
+            const r = document.getElementById('root');
+            r.innerHTML = `
+        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+        <div class="q-num">Question ${cur+1} of ${pool.length}${isKnown ? ' <span style="color:#1D9E75;font-weight:500;">(known)</span>' : ''}</div>
+        <div class="q-meta">
+          <span class="tag">${q.t}</span>
+          ${diffBadge(q.d)}
+          ${isKnown ? '<span class="badge-known">known</span>' : ''}
+        </div>
+        <div class="q-text">${q.q}</div>
+        <div class="opts" id="opts">
+          ${q.o.map((o,i)=>`
+            <div class="opt" id="o${i}" onclick="pick(${i})">
+              <span class="ltr">${['A','B','C','D'][i]}</span>
+              <span class="opt-txt">${o}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="exp" id="exp">${q.e}</div>
+        <div class="footer">
+          <div class="footer-left">
+            <span class="score-chip">${score} correct so far</span>
+            <button class="know-btn${isKnown ? ' is-known' : ''}" id="know-toggle" onclick="toggleKnownCurrent()" title="${isKnown ? 'Click to un-mark as known' : 'Click to mark as known (skip in future rounds)'}">
+              <span class="know-icon">${isKnown ? '✓' : '○'}</span> ${isKnown ? 'Known' : 'Mark known'}
+            </button>
+          </div>
+          <button class="next" id="nb" onclick="nextQ()" disabled>${cur+1===pool.length?'See results':'Next →'}</button>
+        </div>
+      `;
+            answered = false;
+        }
+
+        function toggleKnownCurrent() {
+            if (cur >= pool.length) return;
+            const q = pool[cur];
+            toggleKnown(q.q);
+            // Re-render to update button state
+            renderQ();
+            // If explanation was already shown, keep it visible
+            if (answered) {
+                document.getElementById('exp').style.display = 'block';
+                document.getElementById('nb').disabled = false;
+                // Re-apply correct/wrong classes
+                const qData = pool[cur];
+                for (let i = 0; i < qData.o.length; i++) {
+                    const optEl = document.getElementById('o' + i);
+                    if (!optEl) continue;
+                    optEl.onclick = null;
+                    if (i === qData.c && results.length > 0 && results[results.length - 1] && results[results
+                            .length - 1].q === qData.q) {
+                        const lastResult = results.filter(r => r.q === qData.q).pop();
+                        if (lastResult) {
+                            if (lastResult.ok && i === qData.c) optEl.classList.add('correct');
+                            else if (!lastResult.ok && i === qData.c) optEl.classList.add('show-correct');
+                        }
+                    }
+                }
+                // Find the wrong pick if any
+                const wrongResults = results.filter(r => r.q === qData.q && !r.ok);
+                if (wrongResults.length > 0) {
+                    // We don't know which index was picked from results alone, so skip re-marking wrong
+                }
+            }
+        }
+
+        function toggleKnown(qText) {
+            if (knownTexts.has(qText)) {
+                knownTexts.delete(qText);
+                showToast('Removed from known');
+            } else {
+                knownTexts.add(qText);
+                showToast('Marked as known – will be hidden in future rounds');
+            }
+            saveKnown(knownTexts);
+        }
+
+        function pick(i) {
+            if (answered) return;
+            answered = true;
+            const q = pool[cur];
+            document.querySelectorAll('.opt').forEach(o => o.onclick = null);
+            if (i === q.c) {
+                document.getElementById('o' + i).classList.add('correct');
+                score++;
+                results.push({ q: q.q, t: q.t, ok: true });
+            } else {
+                document.getElementById('o' + i).classList.add('wrong');
+                document.getElementById('o' + q.c).classList.add('show-correct');
+                results.push({ q: q.q, t: q.t, ok: false });
+            }
+            document.getElementById('exp').style.display = 'block';
+            document.getElementById('nb').disabled = false;
+        }
+
+        function nextQ() {
+            cur++;
+            if (cur >= pool.length) { renderScore(); return; }
+            renderQ();
+        }
+
+        // ── Render: Score / Results ───────────────────────────────────
+        function renderScore() {
+            const pct = Math.round(score / pool.length * 100);
+            const msg = pct >= 80 ? 'Excellent — quiz ready.' : pct >= 60 ? 'Solid. Review the misses.' :
+                'Keep reviewing — focus on wrong answers.';
+            const topicStats = {};
+            results.forEach(r => {
+                if (!topicStats[r.t]) topicStats[r.t] = { ok: 0, total: 0 };
+                topicStats[r.t].total++;
+                if (r.ok) topicStats[r.t].ok++;
+            });
+            const r = document.getElementById('root');
+            r.innerHTML = `
+        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+        <div class="score-wrap">
+          <div class="big-score">${score}/${pool.length}</div>
+          <div class="score-sub">${pct}% — ${msg}</div>
+          <div style="margin-bottom:12px;font-size:13px;color:var(--color-text-secondary);text-align:left;font-weight:500">By topic</div>
+          <div class="breakdown">
+            ${Object.entries(topicStats).map(([t,s])=>`
+              <div class="bd-row">
+                <span class="bd-q">${t}</span>
+                <span style="font-size:13px;color:var(--color-text-secondary);flex-shrink:0">${s.ok}/${s.total}</span>
+                <span class="${s.ok===s.total?'badge-ok':'badge-no'}">${Math.round(s.ok/s.total*100)}%</span>
+              </div>
+            `).join('')}
+          </div>
+          <div style="margin-bottom:12px;font-size:13px;color:var(--color-text-secondary);text-align:left;font-weight:500">
+            All questions
+            <span style="font-weight:400;font-size:11px;color:var(--color-text-tertiary);margin-left:6px">(click row to toggle known)</span>
+          </div>
+          <div class="breakdown">
+            ${results.map(r=>{
+              const isKn = knownTexts.has(r.q);
+              return `
+              <div class="bd-row${isKn ? ' is-known-row' : ''}" onclick="toggleKnownFromResults('${r.q.replace(/'/g,"&#39;").replace(/"/g,"&quot;")}')" title="${isKn ? 'Click to un-mark as known' : 'Click to mark as known'}">
+                <span class="bd-q">${isKn ? '<span class="known-dot"></span>' : ''}${r.q}</span>
+                <span class="${r.ok?'badge-ok':'badge-no'}">${r.ok?'correct':'wrong'}</span>
+                ${isKn ? '<span class="badge-known">known</span>' : ''}
+              </div>
+            `;
+            }).join('')}
+          </div>
+          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+            <button class="next" onclick="restartSame()">Retry same set</button>
+            <button class="sec" onclick="backToStart()">Change filters</button>
+          </div>
+        </div>
+      `;
+        }
+
+        function toggleKnownFromResults(qText) {
+            toggleKnown(qText);
+            renderScore();
+        }
+
+        function restartSame() {
+            pool = getPool();
+            if (!pool.length) {
+                if (hideKnown && knownCount() > 0) {
+                    alert(
+                        'All matching questions are now marked as known. Switching to "Show all" so you can retry.'
+                        );
+                    hideKnown = false;
+                    pool = getPool();
+                }
+                if (!pool.length) {
+                    alert('No questions match your filters.');
+                    backToStart();
+                    return;
+                }
+            }
+            cur = 0;
+            score = 0;
+            results = [];
+            answered = false;
+            renderQ();
+        }
+
+        function backToStart() {
+            mode = 'start';
+            renderStart();
+        }
+
+        // ── Init ──────────────────────────────────────────────────────
+        renderStart();
+    </script>
+</body>
+</html>
