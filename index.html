@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>50-Question Quiz – REST & State Management</title>
+    <title>Quiz – REST, APIs & State Management</title>
     <style>
         :root {
             --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -16,451 +16,88 @@
             --color-border-secondary: #c5c5d0;
             --border-radius-md: 8px;
         }
-
-        * {
-            box-sizing: border-box;
-        }
-        body {
-            margin: 0;
-            background: #fafafa;
-        }
-        .wrap {
-            max-width: 680px;
-            margin: 0 auto;
-            padding: 1.5rem 1rem;
-            font-family: var(--font-sans);
-        }
-        .topbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .prog-bar {
-            height: 4px;
-            background: var(--color-border-tertiary);
-            border-radius: 2px;
-            margin-bottom: 1.5rem;
-        }
-        .prog-fill {
-            height: 4px;
-            background: #7F77DD;
-            border-radius: 2px;
-            transition: width 0.4s;
-        }
-        .q-meta {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        .tag {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            background: var(--color-background-secondary);
-            color: var(--color-text-secondary);
-            border: 0.5px solid var(--color-border-tertiary);
-        }
-        .diff-e {
-            background: #EAF3DE;
-            color: #3B6D11;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        .diff-m {
-            background: #FAEEDA;
-            color: #854F0B;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        .diff-h {
-            background: #FCEBEB;
-            color: #A32D2D;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-        }
-        .q-num {
-            font-size: 12px;
-            color: var(--color-text-tertiary);
-            letter-spacing: .05em;
-            text-transform: uppercase;
-            margin-bottom: 6px;
-        }
-        .q-text {
-            font-size: 16px;
-            color: var(--color-text-primary);
-            font-weight: 500;
-            line-height: 1.5;
-            margin-bottom: 1.25rem;
-        }
-        .opts {
-            display: flex;
-            flex-direction: column;
-            gap: 9px;
-        }
-        .opt {
-            display: flex;
-            align-items: flex-start;
-            gap: 11px;
-            padding: 11px 13px;
-            border: 0.5px solid var(--color-border-tertiary);
-            border-radius: var(--border-radius-md);
-            cursor: pointer;
-            background: var(--color-background-primary);
-            transition: border-color .15s, background .15s;
-        }
-        .opt:hover {
-            border-color: var(--color-border-secondary);
-            background: var(--color-background-secondary);
-        }
-        .opt.correct {
-            border-color: #1D9E75;
-            background: #E1F5EE;
-        }
-        .opt.wrong {
-            border-color: #E24B4A;
-            background: #FCEBEB;
-        }
-        .opt.show-correct {
-            border-color: #1D9E75;
-            background: #E1F5EE;
-        }
-        .ltr {
-            font-size: 11px;
-            font-weight: 500;
-            min-width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            background: var(--color-background-secondary);
-            color: var(--color-text-secondary);
-            border: 0.5px solid var(--color-border-tertiary);
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-        .opt.correct .ltr {
-            background: #1D9E75;
-            color: #fff;
-            border-color: #1D9E75;
-        }
-        .opt.wrong .ltr {
-            background: #E24B4A;
-            color: #fff;
-            border-color: #E24B4A;
-        }
-        .opt.show-correct .ltr {
-            background: #1D9E75;
-            color: #fff;
-            border-color: #1D9E75;
-        }
-        .opt-txt {
-            font-size: 14px;
-            color: var(--color-text-primary);
-            line-height: 1.4;
-        }
-        .exp {
-            margin-top: 1rem;
-            padding: 13px;
-            border-radius: var(--border-radius-md);
-            background: var(--color-background-secondary);
-            border-left: 3px solid #7F77DD;
-            font-size: 13px;
-            color: var(--color-text-secondary);
-            line-height: 1.6;
-            display: none;
-        }
-        .exp strong {
-            color: var(--color-text-primary);
-            font-weight: 500;
-        }
-        .footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 1.25rem;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-        .footer-left {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .score-chip {
-            font-size: 13px;
-            color: var(--color-text-secondary);
-        }
-        button.next {
-            padding: 8px 18px;
-            border-radius: var(--border-radius-md);
-            border: 0.5px solid #534AB7;
-            background: #534AB7;
-            color: #fff;
-            font-size: 14px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        button.next:hover {
-            background: #3C3489;
-        }
-        button.next:disabled {
-            opacity: .35;
-            cursor: default;
-        }
-        button.sec {
-            padding: 8px 16px;
-            border-radius: var(--border-radius-md);
-            border: 0.5px solid var(--color-border-secondary);
-            background: transparent;
-            color: var(--color-text-primary);
-            font-size: 13px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        button.sec:hover {
-            background: var(--color-background-secondary);
-        }
-
-        /* Known toggle button */
-        button.know-btn {
-            padding: 6px 12px;
-            border-radius: var(--border-radius-md);
-            border: 0.5px solid var(--color-border-tertiary);
-            background: transparent;
-            color: var(--color-text-secondary);
-            font-size: 12px;
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        button.know-btn:hover {
-            border-color: #7F77DD;
-            color: #534AB7;
-            background: #f8f7ff;
-        }
-        button.know-btn.is-known {
-            background: #E1F5EE;
-            border-color: #1D9E75;
-            color: #0F6E56;
-            font-weight: 500;
-        }
-        button.know-btn.is-known:hover {
-            background: #FCEBEB;
-            border-color: #E24B4A;
-            color: #A32D2D;
-        }
-        button.know-btn .know-icon {
-            font-size: 13px;
-            line-height: 1;
-        }
-
-        /* Known indicator dot */
-        .known-dot {
-            display: inline-block;
-            width: 7px;
-            height: 7px;
-            border-radius: 50%;
-            background: #1D9E75;
-            flex-shrink: 0;
-            margin-right: 2px;
-            vertical-align: middle;
-        }
-
-        .score-wrap {
-            text-align: center;
-            padding: 2rem 0;
-        }
-        .big-score {
-            font-size: 54px;
-            font-weight: 500;
-            color: var(--color-text-primary);
-        }
-        .score-sub {
-            font-size: 15px;
-            color: var(--color-text-secondary);
-            margin-top: 6px;
-            margin-bottom: 1.5rem;
-        }
-        .breakdown {
-            display: flex;
-            flex-direction: column;
-            gap: 7px;
-            margin-bottom: 1.5rem;
-        }
-        .bd-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 13px;
-            padding: 8px 12px;
-            border-radius: var(--border-radius-md);
-            background: var(--color-background-secondary);
-            gap: 8px;
-            cursor: pointer;
-            transition: background 0.15s;
-        }
-        .bd-row:hover {
-            background: #ececf2;
-        }
-        .bd-row.is-known-row {
-            border-left: 3px solid #1D9E75;
-        }
-        .bd-q {
-            color: var(--color-text-secondary);
-            text-align: left;
-            flex: 1;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .badge-ok {
-            background: #E1F5EE;
-            color: #0F6E56;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-            flex-shrink: 0;
-        }
-        .badge-no {
-            background: #FCEBEB;
-            color: #A32D2D;
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-weight: 500;
-            flex-shrink: 0;
-        }
-        .badge-known {
-            background: #E1F5EE;
-            color: #0F6E56;
-            font-size: 10px;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-weight: 500;
-            flex-shrink: 0;
-            letter-spacing: .03em;
-        }
-        .filter-bar {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-            margin-bottom: 1rem;
-        }
-        .filter-btn {
-            font-size: 12px;
-            padding: 4px 10px;
-            border-radius: 4px;
-            border: 0.5px solid var(--color-border-secondary);
-            background: transparent;
-            color: var(--color-text-secondary);
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .filter-btn.active {
-            background: #534AB7;
-            color: #fff;
-            border-color: #534AB7;
-        }
-        .filter-btn.known-active {
-            background: #1D9E75;
-            color: #fff;
-            border-color: #1D9E75;
-        }
-        .start-wrap {
-            text-align: center;
-            padding: 2rem 0;
-        }
-        .start-title {
-            font-size: 20px;
-            font-weight: 500;
-            color: var(--color-text-primary);
-            margin-bottom: 8px;
-        }
-        .start-sub {
-            font-size: 14px;
-            color: var(--color-text-secondary);
-            margin-bottom: 1.5rem;
-        }
-        .stat-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-            gap: 10px;
-            margin-bottom: 1.5rem;
-        }
-        .stat-card {
-            background: var(--color-background-secondary);
-            border-radius: var(--border-radius-md);
-            padding: 12px;
-            text-align: center;
-        }
-        .stat-n {
-            font-size: 24px;
-            font-weight: 500;
-            color: var(--color-text-primary);
-        }
-        .stat-l {
-            font-size: 12px;
-            color: var(--color-text-secondary);
-            margin-top: 2px;
-        }
-        .reset-link {
-            font-size: 12px;
-            color: var(--color-text-tertiary);
-            cursor: pointer;
-            text-decoration: underline;
-            margin-top: 8px;
-            display: inline-block;
-        }
-        .reset-link:hover {
-            color: #E24B4A;
-        }
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #1a1a2e;
-            color: #fff;
-            padding: 10px 20px;
-            border-radius: 20px;
-            font-size: 13px;
-            z-index: 999;
-            opacity: 0;
-            transition: opacity 0.3s;
-            pointer-events: none;
-            font-family: var(--font-sans);
-        }
-        .toast.show {
-            opacity: 1;
-        }
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #fafafa; }
+        .wrap { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem; font-family: var(--font-sans); }
+        .loading { text-align: center; padding: 3rem 1rem; font-size: 16px; color: var(--color-text-secondary); }
+        .loading .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #e0e0e6; border-top-color: #7F77DD; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; vertical-align: middle; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .prog-bar { height: 4px; background: var(--color-border-tertiary); border-radius: 2px; margin-bottom: 1.5rem; }
+        .prog-fill { height: 4px; background: #7F77DD; border-radius: 2px; transition: width 0.4s; }
+        .q-meta { display: flex; gap: 6px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+        .tag { font-size: 11px; padding: 2px 8px; border-radius: 4px; background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); }
+        .diff-e { background: #EAF3DE; color: #3B6D11; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+        .diff-m { background: #FAEEDA; color: #854F0B; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+        .diff-h { background: #FCEBEB; color: #A32D2D; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; }
+        .q-num { font-size: 12px; color: var(--color-text-tertiary); letter-spacing: .05em; text-transform: uppercase; margin-bottom: 6px; }
+        .q-text { font-size: 16px; color: var(--color-text-primary); font-weight: 500; line-height: 1.5; margin-bottom: 1.25rem; }
+        .opts { display: flex; flex-direction: column; gap: 9px; }
+        .opt { display: flex; align-items: flex-start; gap: 11px; padding: 11px 13px; border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); cursor: pointer; background: var(--color-background-primary); transition: border-color .15s, background .15s; }
+        .opt:hover { border-color: var(--color-border-secondary); background: var(--color-background-secondary); }
+        .opt.correct { border-color: #1D9E75; background: #E1F5EE; }
+        .opt.wrong { border-color: #E24B4A; background: #FCEBEB; }
+        .opt.show-correct { border-color: #1D9E75; background: #E1F5EE; }
+        .ltr { font-size: 11px; font-weight: 500; min-width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; border-radius: 4px; background: var(--color-background-secondary); color: var(--color-text-secondary); border: 0.5px solid var(--color-border-tertiary); flex-shrink: 0; margin-top: 1px; }
+        .opt.correct .ltr { background: #1D9E75; color: #fff; border-color: #1D9E75; }
+        .opt.wrong .ltr { background: #E24B4A; color: #fff; border-color: #E24B4A; }
+        .opt.show-correct .ltr { background: #1D9E75; color: #fff; border-color: #1D9E75; }
+        .opt-txt { font-size: 14px; color: var(--color-text-primary); line-height: 1.4; }
+        .exp { margin-top: 1rem; padding: 13px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); border-left: 3px solid #7F77DD; font-size: 13px; color: var(--color-text-secondary); line-height: 1.6; display: none; }
+        .exp strong { color: var(--color-text-primary); font-weight: 500; }
+        .footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; flex-wrap: wrap; gap: 8px; }
+        .footer-left { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .score-chip { font-size: 13px; color: var(--color-text-secondary); }
+        button.next { padding: 8px 18px; border-radius: var(--border-radius-md); border: 0.5px solid #534AB7; background: #534AB7; color: #fff; font-size: 14px; cursor: pointer; white-space: nowrap; }
+        button.next:hover { background: #3C3489; }
+        button.next:disabled { opacity: .35; cursor: default; }
+        button.sec { padding: 8px 16px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); font-size: 13px; cursor: pointer; white-space: nowrap; }
+        button.sec:hover { background: var(--color-background-secondary); }
+        button.know-btn { padding: 6px 12px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-tertiary); background: transparent; color: var(--color-text-secondary); font-size: 12px; cursor: pointer; white-space: nowrap; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+        button.know-btn:hover { border-color: #7F77DD; color: #534AB7; background: #f8f7ff; }
+        button.know-btn.is-known { background: #E1F5EE; border-color: #1D9E75; color: #0F6E56; font-weight: 500; }
+        button.know-btn.is-known:hover { background: #FCEBEB; border-color: #E24B4A; color: #A32D2D; }
+        button.know-btn .know-icon { font-size: 13px; line-height: 1; }
+        .known-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #1D9E75; flex-shrink: 0; margin-right: 2px; vertical-align: middle; }
+        .score-wrap { text-align: center; padding: 2rem 0; }
+        .big-score { font-size: 54px; font-weight: 500; color: var(--color-text-primary); }
+        .score-sub { font-size: 15px; color: var(--color-text-secondary); margin-top: 6px; margin-bottom: 1.5rem; }
+        .breakdown { display: flex; flex-direction: column; gap: 7px; margin-bottom: 1.5rem; }
+        .bd-row { display: flex; justify-content: space-between; align-items: center; font-size: 13px; padding: 8px 12px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); gap: 8px; cursor: pointer; transition: background 0.15s; }
+        .bd-row:hover { background: #ececf2; }
+        .bd-row.is-known-row { border-left: 3px solid #1D9E75; }
+        .bd-q { color: var(--color-text-secondary); text-align: left; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 4px; }
+        .badge-ok { background: #E1F5EE; color: #0F6E56; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; flex-shrink: 0; }
+        .badge-no { background: #FCEBEB; color: #A32D2D; font-size: 11px; padding: 2px 8px; border-radius: 4px; font-weight: 500; flex-shrink: 0; }
+        .badge-known { background: #E1F5EE; color: #0F6E56; font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: 500; flex-shrink: 0; letter-spacing: .03em; }
+        .filter-bar { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+        .filter-btn { font-size: 12px; padding: 4px 10px; border-radius: 4px; border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-secondary); cursor: pointer; white-space: nowrap; }
+        .filter-btn.active { background: #534AB7; color: #fff; border-color: #534AB7; }
+        .filter-btn.known-active { background: #1D9E75; color: #fff; border-color: #1D9E75; }
+        .start-wrap { text-align: center; padding: 2rem 0; }
+        .start-title { font-size: 20px; font-weight: 500; color: var(--color-text-primary); margin-bottom: 8px; }
+        .start-sub { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+        .stat-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px; text-align: center; }
+        .stat-n { font-size: 24px; font-weight: 500; color: var(--color-text-primary); }
+        .stat-l { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+        .reset-link { font-size: 12px; color: var(--color-text-tertiary); cursor: pointer; text-decoration: underline; margin-top: 8px; display: inline-block; }
+        .reset-link:hover { color: #E24B4A; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #1a1a2e; color: #fff; padding: 10px 20px; border-radius: 20px; font-size: 13px; z-index: 999; opacity: 0; transition: opacity 0.3s; pointer-events: none; font-family: var(--font-sans); }
+        .toast.show { opacity: 1; }
+        .error-box { text-align: center; padding: 2rem; color: #A32D2D; font-size: 14px; background: #FCEBEB; border-radius: var(--border-radius-md); margin-bottom: 1rem; }
     </style>
 </head>
 <body>
-    <div class="wrap" id="root"></div>
+    <div class="wrap" id="root">
+        <div class="loading"><span class="spinner"></span> Loading questions…</div>
+    </div>
     <div class="toast" id="toast"></div>
 
+    <script src="questions.js"></script>
+
     <script>
-        const ALL = [
+
+        const FALLBACK_QUESTIONS = [
             { t: "REST basics", d: "easy",
                 q: "What does REST stand for?",
                 o: ["Remote Execution State Transfer", "Representational State Transfer",
@@ -852,46 +489,50 @@
             }
         ];
 
-        // ── Known questions – localStorage ────────────────────────────
-        const STORAGE_KEY = 'quiz_known_texts';
+        let ALL_QUESTIONS = [];
 
-        function loadKnown() {
-            try {
-                const raw = localStorage.getItem(STORAGE_KEY);
-                if (raw) {
-                    const arr = JSON.parse(raw);
-                    return new Set(arr);
+        function loadQuestions() {
+            const jsonData = window.__QUESTIONS_JSON__ || [];
+            console.log(jsonData.length)
+            if (!jsonData.length) {
+                console.warn('questions.js not loaded or empty, using built‑in fallback.');
+                ALL_QUESTIONS = [...FALLBACK_QUESTIONS];
+                initQuiz();
+                return;
+            }
+            // Merge with fallback, deduplicating by question text
+            const existingTexts = new Set(FALLBACK_QUESTIONS.map(q => q.q));
+            console.log(existingTexts)
+            const merged = [...FALLBACK_QUESTIONS];
+            
+            console.log(merged.length)
+
+            for (const item of jsonData) {
+                const q = {
+                    t: item.t || 'General',
+                    d: item.d || 'medium',
+                    q: item.q,
+                    o: item.o,
+                    c: item.c,
+                    e: item.e || ''
+                };
+                if (true) {
+                    merged.push(q);
+                    existingTexts.add(q.q);
                 }
-            } catch (e) {
-                // localStorage unavailable or corrupted – silently start fresh
             }
-            return new Set();
+            ALL_QUESTIONS = merged;
+            console.log(ALL_QUESTIONS.length)
+
+            initQuiz();
         }
 
-        function saveKnown(set) {
-            try {
-                localStorage.setItem(STORAGE_KEY, JSON.stringify([...set]));
-            } catch (e) {
-                // storage full or unavailable – ignore
-            }
-        }
-
-        let knownTexts = loadKnown();
-        let hideKnown = true; // default: hide known questions from pool
-
-        // ── Toast ──────────────────────────────────────────────────────
-        let toastTimer = null;
-
-        function showToast(msg) {
-            const el = document.getElementById('toast');
-            if (!el) return;
-            el.textContent = msg;
-            el.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
-        }
-
-        // ── State ──────────────────────────────────────────────────────
+        // ═══════════════════════════════════════════════════════════════
+        // 3. Quiz state & logic
+        // ═══════════════════════════════════════════════════════════════
+        const STORAGE_KEY = 'quiz_known_texts';
+        let knownTexts = new Set();
+        let hideKnown = true;
         let mode = 'start';
         let filterTopic = 'all';
         let filterDiff = 'all';
@@ -901,8 +542,26 @@
         let score = 0;
         let results = [];
 
+        function loadKnown() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY);
+                if (raw) knownTexts = new Set(JSON.parse(raw));
+            } catch (e) {}
+        }
+        function saveKnown() {
+            try { localStorage.setItem(STORAGE_KEY, JSON.stringify([...knownTexts])); } catch (e) {}
+        }
+
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            clearTimeout(window._toastTimer);
+            window._toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+        }
+
         function getPool() {
-            let filtered = ALL.filter(q =>
+            let filtered = ALL_QUESTIONS.filter(q =>
                 (filterTopic === 'all' || q.t === filterTopic) &&
                 (filterDiff === 'all' || q.d === filterDiff)
             );
@@ -912,63 +571,57 @@
             return filtered.sort(() => Math.random() - 0.5);
         }
 
-        function knownCount() {
-            let count = 0;
-            for (const q of ALL) {
-                if (knownTexts.has(q.q)) count++;
-            }
-            return count;
-        }
-
-        const topics = [...new Set(ALL.map(q => q.t))];
+        const topics = () => [...new Set(ALL_QUESTIONS.map(q => q.t))];
         const diffs = ['easy', 'medium', 'hard'];
 
         function diffBadge(d) {
-            if (d === 'easy') return `<span class="diff-e">easy</span>`;
-            if (d === 'medium') return `<span class="diff-m">medium</span>`;
-            return `<span class="diff-h">hard</span>`;
+            if (d === 'easy') return '<span class="diff-e">easy</span>';
+            if (d === 'medium') return '<span class="diff-m">medium</span>';
+            return '<span class="diff-h">hard</span>';
         }
 
-        // ── Render: Start screen ──────────────────────────────────────
+        // ═══════════════════════════════════════════════════════════════
+        // 4. Rendering functions
+        // ═══════════════════════════════════════════════════════════════
         function renderStart() {
             const topicCounts = {};
-            topics.forEach(t => topicCounts[t] = ALL.filter(q => q.t === t).length);
-            const knCount = knownCount();
+            topics().forEach(t => topicCounts[t] = ALL_QUESTIONS.filter(q => q.t === t).length);
+            const knCount = knownTexts.size;
             const availableCount = getPool().length;
             const r = document.getElementById('root');
             r.innerHTML = `
-        <div class="start-wrap">
-          <div class="start-title">50-question quiz</div>
-          <div class="start-sub">Filter by topic or difficulty, then start. Mark questions as "known" to skip them in future rounds.</div>
-          <div class="stat-grid">
-            <div class="stat-card"><div class="stat-n">50</div><div class="stat-l">total questions</div></div>
-            <div class="stat-card"><div class="stat-n">7</div><div class="stat-l">topics</div></div>
-            <div class="stat-card"><div class="stat-n">3</div><div class="stat-l">difficulty levels</div></div>
-            <div class="stat-card"><div class="stat-n">${knCount}</div><div class="stat-l">marked known</div></div>
-          </div>
-          <div style="margin-bottom:8px;font-size:12px;color:var(--color-text-secondary);text-align:left">Filter by topic</div>
-          <div class="filter-bar" id="topic-filters">
-            <button class="filter-btn active" onclick="setTopic('all')">All topics</button>
-            ${topics.map(t=>`<button class="filter-btn" onclick="setTopic('${t.replace(/'/g,"&#39;")}')">${t} (${topicCounts[t]})</button>`).join('')}
-          </div>
-          <div style="margin-bottom:8px;margin-top:12px;font-size:12px;color:var(--color-text-secondary);text-align:left">Filter by difficulty</div>
-          <div class="filter-bar" id="diff-filters">
-            <button class="filter-btn active" onclick="setDiff('all')">All difficulties</button>
-            ${diffs.map(d=>`<button class="filter-btn" onclick="setDiff('${d}')">${d}</button>`).join('')}
-          </div>
-          <div style="margin-bottom:8px;margin-top:12px;font-size:12px;color:var(--color-text-secondary);text-align:left">Known questions</div>
-          <div class="filter-bar" id="known-filters">
-            <button class="filter-btn known-active" id="btn-hide-known" onclick="setHideKnown(true)">Hide known</button>
-            <button class="filter-btn" id="btn-show-all" onclick="setHideKnown(false)">Show all</button>
-          </div>
-          <div style="margin-top:0.5rem;font-size:13px;color:var(--color-text-secondary)" id="q-count"></div>
-          ${knCount > 0 ? `<span class="reset-link" onclick="resetKnown()">Clear all known marks (${knCount} question${knCount===1?'':'s'})</span>` : ''}
-          <div style="margin-top:1rem">
-            <button class="next" onclick="startQuiz()">Start quiz</button>
-          </div>
-          ${availableCount === 0 && hideKnown ? `<div style="margin-top:12px;font-size:13px;color:#A32D2D;">All matching questions are marked as known. Switch to "Show all" or clear known marks above.</div>` : ''}
-        </div>
-      `;
+            <div class="start-wrap">
+              <div class="start-title">${ALL_QUESTIONS.length}-question quiz</div>
+              <div class="start-sub">Filter by topic or difficulty, then start. Mark questions as "known" to skip them in future rounds.</div>
+              <div class="stat-grid">
+                <div class="stat-card"><div class="stat-n">${ALL_QUESTIONS.length}</div><div class="stat-l">total questions</div></div>
+                <div class="stat-card"><div class="stat-n">${topics().length}</div><div class="stat-l">topics</div></div>
+                <div class="stat-card"><div class="stat-n">3</div><div class="stat-l">difficulty levels</div></div>
+                <div class="stat-card"><div class="stat-n">${knCount}</div><div class="stat-l">marked known</div></div>
+              </div>
+              <div style="margin-bottom:8px;font-size:12px;color:var(--color-text-secondary);text-align:left">Filter by topic</div>
+              <div class="filter-bar" id="topic-filters">
+                <button class="filter-btn active" onclick="setTopic('all')">All topics</button>
+                ${topics().map(t=>`<button class="filter-btn" onclick="setTopic('${t.replace(/'/g,"&#39;")}')">${t} (${topicCounts[t]})</button>`).join('')}
+              </div>
+              <div style="margin-bottom:8px;margin-top:12px;font-size:12px;color:var(--color-text-secondary);text-align:left">Filter by difficulty</div>
+              <div class="filter-bar" id="diff-filters">
+                <button class="filter-btn active" onclick="setDiff('all')">All difficulties</button>
+                ${diffs.map(d=>`<button class="filter-btn" onclick="setDiff('${d}')">${d}</button>`).join('')}
+              </div>
+              <div style="margin-bottom:8px;margin-top:12px;font-size:12px;color:var(--color-text-secondary);text-align:left">Known questions</div>
+              <div class="filter-bar" id="known-filters">
+                <button class="filter-btn known-active" id="btn-hide-known" onclick="setHideKnown(true)">Hide known</button>
+                <button class="filter-btn" id="btn-show-all" onclick="setHideKnown(false)">Show all</button>
+              </div>
+              <div style="margin-top:0.5rem;font-size:13px;color:var(--color-text-secondary)" id="q-count"></div>
+              ${knCount > 0 ? `<span class="reset-link" onclick="resetKnown()">Clear all known marks (${knCount} question${knCount===1?'':'s'})</span>` : ''}
+              <div style="margin-top:1rem">
+                <button class="next" onclick="startQuiz()">Start quiz</button>
+              </div>
+              ${availableCount === 0 && hideKnown ? `<div style="margin-top:12px;font-size:13px;color:#A32D2D;">All matching questions are marked as known. Switch to "Show all" or clear known marks above.</div>` : ''}
+            </div>
+          `;
             updateCount();
         }
 
@@ -976,269 +629,226 @@
             const n = getPool().length;
             const el = document.getElementById('q-count');
             if (el) {
-                const hiddenNote = hideKnown && knownCount() > 0 ? ` (${knownCount()} known hidden)` : '';
+                const hiddenNote = hideKnown && knownTexts.size > 0 ? ` (${knownTexts.size} known hidden)` : '';
                 el.textContent = n + ' question' + (n === 1 ? '' : 's') + ' match your filters' + hiddenNote;
             }
         }
 
-        function setTopic(v) {
+        window.setTopic = function(v) {
             filterTopic = v;
-            document.querySelectorAll('#topic-filters .filter-btn').forEach(b => b.classList.remove(
-            'active'));
+            document.querySelectorAll('#topic-filters .filter-btn').forEach(b => b.classList.remove('active'));
             const target = document.querySelector(`#topic-filters .filter-btn[onclick="setTopic('${v.replace(/'/g,"&#39;")}')"]`);
             if (target) target.classList.add('active');
-            updateCount();
-        }
-
-        function setDiff(v) {
+            renderStart();
+        };
+        window.setDiff = function(v) {
             filterDiff = v;
             document.querySelectorAll('#diff-filters .filter-btn').forEach(b => b.classList.remove('active'));
             const target = document.querySelector(`#diff-filters .filter-btn[onclick="setDiff('${v}')"]`);
             if (target) target.classList.add('active');
-            updateCount();
-        }
-
-        function setHideKnown(v) {
-            hideKnown = v;
-            const btnHide = document.getElementById('btn-hide-known');
-            const btnShow = document.getElementById('btn-show-all');
-            if (btnHide) {
-                if (v) btnHide.classList.add('known-active');
-                else btnHide.classList.remove('known-active');
-            }
-            if (btnShow) {
-                if (!v) btnShow.classList.add('known-active');
-                else btnShow.classList.remove('known-active');
-            }
-            updateCount();
-            // If on start screen, refresh to update the "all known" warning
-            if (mode === 'start') {
-                renderStart();
-            }
-        }
-
-        function resetKnown() {
-            if (knownTexts.size === 0) return;
-            if (!confirm(
-                    `You have ${knownTexts.size} question${knownTexts.size===1?'':'s'} marked as known. Clear all?`
-                    )) return;
-            knownTexts.clear();
-            saveKnown(knownTexts);
-            showToast('All known marks cleared');
             renderStart();
-        }
-
-        function startQuiz() {
+        };
+        window.setHideKnown = function(v) {
+            hideKnown = v;
+            document.getElementById('btn-hide-known').classList.toggle('known-active', v);
+            document.getElementById('btn-show-all').classList.toggle('known-active', !v);
+            renderStart();
+        };
+        window.resetKnown = function() {
+            if (knownTexts.size === 0) return;
+            if (!confirm(`Clear all ${knownTexts.size} known marks?`)) return;
+            knownTexts.clear();
+            saveKnown();
+            showToast('Known marks cleared');
+            renderStart();
+        };
+        window.startQuiz = function() {
             pool = getPool();
             if (!pool.length) {
-                if (hideKnown && knownCount() > 0) {
-                    alert(
-                        'All matching questions are marked as known. Switch to "Show all" or clear known marks to continue.'
-                        );
-                } else {
-                    alert('No questions match your filters.');
-                }
+                alert('No questions match your filters.');
                 return;
             }
-            cur = 0;
-            score = 0;
-            results = [];
-            answered = false;
+            cur = 0; score = 0; results = []; answered = false;
             mode = 'quiz';
             renderQ();
-        }
+        };
 
-        // ── Render: Question ──────────────────────────────────────────
         function renderQ() {
             const q = pool[cur];
             const pct = Math.round(cur / pool.length * 100);
             const isKnown = knownTexts.has(q.q);
             const r = document.getElementById('root');
             r.innerHTML = `
-        <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
-        <div class="q-num">Question ${cur+1} of ${pool.length}${isKnown ? ' <span style="color:#1D9E75;font-weight:500;">(known)</span>' : ''}</div>
-        <div class="q-meta">
-          <span class="tag">${q.t}</span>
-          ${diffBadge(q.d)}
-          ${isKnown ? '<span class="badge-known">known</span>' : ''}
-        </div>
-        <div class="q-text">${q.q}</div>
-        <div class="opts" id="opts">
-          ${q.o.map((o,i)=>`
-            <div class="opt" id="o${i}" onclick="pick(${i})">
-              <span class="ltr">${['A','B','C','D'][i]}</span>
-              <span class="opt-txt">${o}</span>
+            <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+            <div class="q-num">Question ${cur+1} of ${pool.length}${isKnown ? ' <span style="color:#1D9E75;font-weight:500;">(known)</span>' : ''}</div>
+            <div class="q-meta">
+              <span class="tag">${q.t}</span>
+              ${diffBadge(q.d)}
+              ${isKnown ? '<span class="badge-known">known</span>' : ''}
             </div>
-          `).join('')}
-        </div>
-        <div class="exp" id="exp">${q.e}</div>
-        <div class="footer">
-          <div class="footer-left">
-            <span class="score-chip">${score} correct so far</span>
-            <button class="know-btn${isKnown ? ' is-known' : ''}" id="know-toggle" onclick="toggleKnownCurrent()" title="${isKnown ? 'Click to un-mark as known' : 'Click to mark as known (skip in future rounds)'}">
-              <span class="know-icon">${isKnown ? '✓' : '○'}</span> ${isKnown ? 'Known' : 'Mark known'}
-            </button>
-          </div>
-          <button class="next" id="nb" onclick="nextQ()" disabled>${cur+1===pool.length?'See results':'Next →'}</button>
-        </div>
-      `;
+            <div class="q-text">${q.q}</div>
+            <div class="opts" id="opts">
+              ${q.o.map((o,i)=>`
+                <div class="opt" id="o${i}" onclick="pick(${i})">
+                  <span class="ltr">${['A','B','C','D'][i]}</span>
+                  <span class="opt-txt">${o}</span>
+                </div>
+              `).join('')}
+            </div>
+            <div class="exp" id="exp">${q.e}</div>
+            <div class="footer">
+              <div class="footer-left">
+                <span class="score-chip">${score} correct so far</span>
+                <button class="know-btn${isKnown ? ' is-known' : ''}" id="know-toggle" onclick="toggleKnownCurrent()">
+                  <span class="know-icon">${isKnown ? '✓' : '○'}</span> ${isKnown ? 'Known' : 'Mark known'}
+                </button>
+              </div>
+              <button class="next" id="nb" onclick="nextQ()" disabled>${cur+1===pool.length?'See results':'Next →'}</button>
+            </div>
+          `;
             answered = false;
         }
 
-        function toggleKnownCurrent() {
-            if (cur >= pool.length) return;
-            const q = pool[cur];
-            toggleKnown(q.q);
-            // Re-render to update button state
-            renderQ();
-            // If explanation was already shown, keep it visible
-            if (answered) {
-                document.getElementById('exp').style.display = 'block';
-                document.getElementById('nb').disabled = false;
-                // Re-apply correct/wrong classes
-                const qData = pool[cur];
-                for (let i = 0; i < qData.o.length; i++) {
-                    const optEl = document.getElementById('o' + i);
-                    if (!optEl) continue;
-                    optEl.onclick = null;
-                    if (i === qData.c && results.length > 0 && results[results.length - 1] && results[results
-                            .length - 1].q === qData.q) {
-                        const lastResult = results.filter(r => r.q === qData.q).pop();
-                        if (lastResult) {
-                            if (lastResult.ok && i === qData.c) optEl.classList.add('correct');
-                            else if (!lastResult.ok && i === qData.c) optEl.classList.add('show-correct');
-                        }
-                    }
-                }
-                // Find the wrong pick if any
-                const wrongResults = results.filter(r => r.q === qData.q && !r.ok);
-                if (wrongResults.length > 0) {
-                    // We don't know which index was picked from results alone, so skip re-marking wrong
-                }
-            }
-        }
-
-        function toggleKnown(qText) {
-            if (knownTexts.has(qText)) {
-                knownTexts.delete(qText);
-                showToast('Removed from known');
-            } else {
-                knownTexts.add(qText);
-                showToast('Marked as known – will be hidden in future rounds');
-            }
-            saveKnown(knownTexts);
-        }
-
-        function pick(i) {
+        window.pick = function(i) {
             if (answered) return;
             answered = true;
             const q = pool[cur];
             document.querySelectorAll('.opt').forEach(o => o.onclick = null);
             if (i === q.c) {
-                document.getElementById('o' + i).classList.add('correct');
+                document.getElementById('o'+i).classList.add('correct');
                 score++;
-                results.push({ q: q.q, t: q.t, ok: true });
+                results.push({q: q.q, t: q.t, ok: true});
             } else {
-                document.getElementById('o' + i).classList.add('wrong');
-                document.getElementById('o' + q.c).classList.add('show-correct');
-                results.push({ q: q.q, t: q.t, ok: false });
+                document.getElementById('o'+i).classList.add('wrong');
+                document.getElementById('o'+q.c).classList.add('show-correct');
+                results.push({q: q.q, t: q.t, ok: false});
             }
             document.getElementById('exp').style.display = 'block';
             document.getElementById('nb').disabled = false;
-        }
+        };
 
-        function nextQ() {
+        window.toggleKnownCurrent = function() {
+            if (cur >= pool.length) return;
+            const qText = pool[cur].q;
+            if (knownTexts.has(qText)) {
+                knownTexts.delete(qText);
+                showToast('Removed from known');
+            } else {
+                knownTexts.add(qText);
+                showToast('Marked as known – will be hidden');
+            }
+            saveKnown();
+            renderQ();
+            if (answered) {
+                document.getElementById('exp').style.display = 'block';
+                document.getElementById('nb').disabled = false;
+                const qData = pool[cur];
+                for (let i = 0; i < qData.o.length; i++) {
+                    document.getElementById('o'+i).onclick = null;
+                }
+                const lastResult = results.find(r => r.q === qData.q);
+                if (lastResult) {
+                    if (lastResult.ok) document.getElementById('o'+qData.c).classList.add('correct');
+                    else {
+                        document.getElementById('o'+qData.c).classList.add('show-correct');
+                    }
+                }
+            }
+        };
+
+        window.nextQ = function() {
             cur++;
             if (cur >= pool.length) { renderScore(); return; }
             renderQ();
-        }
+        };
 
-        // ── Render: Score / Results ───────────────────────────────────
         function renderScore() {
             const pct = Math.round(score / pool.length * 100);
-            const msg = pct >= 80 ? 'Excellent — quiz ready.' : pct >= 60 ? 'Solid. Review the misses.' :
-                'Keep reviewing — focus on wrong answers.';
+            const msg = pct >= 80 ? 'Excellent!' : pct >= 60 ? 'Solid. Review the misses.' : 'Keep reviewing.';
             const topicStats = {};
             results.forEach(r => {
-                if (!topicStats[r.t]) topicStats[r.t] = { ok: 0, total: 0 };
+                if (!topicStats[r.t]) topicStats[r.t] = {ok: 0, total: 0};
                 topicStats[r.t].total++;
                 if (r.ok) topicStats[r.t].ok++;
             });
             const r = document.getElementById('root');
             r.innerHTML = `
-        <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
-        <div class="score-wrap">
-          <div class="big-score">${score}/${pool.length}</div>
-          <div class="score-sub">${pct}% — ${msg}</div>
-          <div style="margin-bottom:12px;font-size:13px;color:var(--color-text-secondary);text-align:left;font-weight:500">By topic</div>
-          <div class="breakdown">
-            ${Object.entries(topicStats).map(([t,s])=>`
-              <div class="bd-row">
-                <span class="bd-q">${t}</span>
-                <span style="font-size:13px;color:var(--color-text-secondary);flex-shrink:0">${s.ok}/${s.total}</span>
-                <span class="${s.ok===s.total?'badge-ok':'badge-no'}">${Math.round(s.ok/s.total*100)}%</span>
+            <div class="prog-bar"><div class="prog-fill" style="width:100%"></div></div>
+            <div class="score-wrap">
+              <div class="big-score">${score}/${pool.length}</div>
+              <div class="score-sub">${pct}% — ${msg}</div>
+              <div style="margin-bottom:12px;font-size:13px;color:var(--color-text-secondary);text-align:left;font-weight:500">By topic</div>
+              <div class="breakdown">
+                ${Object.entries(topicStats).map(([t,s])=>`
+                  <div class="bd-row">
+                    <span class="bd-q">${t}</span>
+                    <span style="font-size:13px;color:var(--color-text-secondary);">${s.ok}/${s.total}</span>
+                    <span class="${s.ok===s.total?'badge-ok':'badge-no'}">${Math.round(s.ok/s.total*100)}%</span>
+                  </div>
+                `).join('')}
               </div>
-            `).join('')}
-          </div>
-          <div style="margin-bottom:12px;font-size:13px;color:var(--color-text-secondary);text-align:left;font-weight:500">
-            All questions
-            <span style="font-weight:400;font-size:11px;color:var(--color-text-tertiary);margin-left:6px">(click row to toggle known)</span>
-          </div>
-          <div class="breakdown">
-            ${results.map(r=>{
-              const isKn = knownTexts.has(r.q);
-              return `
-              <div class="bd-row${isKn ? ' is-known-row' : ''}" onclick="toggleKnownFromResults('${r.q.replace(/'/g,"&#39;").replace(/"/g,"&quot;")}')" title="${isKn ? 'Click to un-mark as known' : 'Click to mark as known'}">
-                <span class="bd-q">${isKn ? '<span class="known-dot"></span>' : ''}${r.q}</span>
-                <span class="${r.ok?'badge-ok':'badge-no'}">${r.ok?'correct':'wrong'}</span>
-                ${isKn ? '<span class="badge-known">known</span>' : ''}
+              <div style="margin-bottom:12px;font-size:13px;color:var(--color-text-secondary);text-align:left;font-weight:500">
+                All questions <span style="font-weight:400;font-size:11px;color:var(--color-text-tertiary);margin-left:6px">(click to toggle known)</span>
               </div>
-            `;
-            }).join('')}
-          </div>
-          <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
-            <button class="next" onclick="restartSame()">Retry same set</button>
-            <button class="sec" onclick="backToStart()">Change filters</button>
-          </div>
-        </div>
-      `;
+              <div class="breakdown">
+                ${results.map(r=>{
+                  const isKn = knownTexts.has(r.q);
+                  return `
+                  <div class="bd-row${isKn ? ' is-known-row' : ''}" onclick="toggleKnownFromResults('${r.q.replace(/'/g,"&#39;").replace(/"/g,"&quot;")}')">
+                    <span class="bd-q">${isKn ? '<span class="known-dot"></span>' : ''}${r.q}</span>
+                    <span class="${r.ok?'badge-ok':'badge-no'}">${r.ok?'correct':'wrong'}</span>
+                    ${isKn ? '<span class="badge-known">known</span>' : ''}
+                  </div>
+                `}).join('')}
+              </div>
+              <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+                <button class="next" onclick="restartSame()">Retry same set</button>
+                <button class="sec" onclick="backToStart()">Change filters</button>
+              </div>
+            </div>
+          `;
         }
 
-        function toggleKnownFromResults(qText) {
-            toggleKnown(qText);
+        window.toggleKnownFromResults = function(qText) {
+            if (knownTexts.has(qText)) {
+                knownTexts.delete(qText);
+                showToast('Removed from known');
+            } else {
+                knownTexts.add(qText);
+                showToast('Marked as known');
+            }
+            saveKnown();
             renderScore();
-        }
+        };
 
-        function restartSame() {
+        window.restartSame = function() {
             pool = getPool();
             if (!pool.length) {
-                if (hideKnown && knownCount() > 0) {
-                    alert(
-                        'All matching questions are now marked as known. Switching to "Show all" so you can retry.'
-                        );
+                if (hideKnown && knownTexts.size > 0) {
+                    alert('All matching questions are now marked as known. Switching to "Show all".');
                     hideKnown = false;
                     pool = getPool();
                 }
-                if (!pool.length) {
-                    alert('No questions match your filters.');
-                    backToStart();
-                    return;
-                }
+                if (!pool.length) { backToStart(); return; }
             }
-            cur = 0;
-            score = 0;
-            results = [];
-            answered = false;
+            cur = 0; score = 0; results = []; answered = false;
             renderQ();
-        }
+        };
 
-        function backToStart() {
+        window.backToStart = function() {
             mode = 'start';
+            renderStart();
+        };
+
+        function initQuiz() {
+            loadKnown();
             renderStart();
         }
 
-        // ── Init ──────────────────────────────────────────────────────
-        renderStart();
+        // ═══════════════════════════════════════════════════════════════
+        // 5. Initialize
+        // ═══════════════════════════════════════════════════════════════
+        loadQuestions();
     </script>
 </body>
 </html>

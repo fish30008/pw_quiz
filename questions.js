@@ -1,4 +1,4 @@
-[
+window.__QUESTIONS_JSON__  = [
   {
     "id": 1,
     "t": "API design",
