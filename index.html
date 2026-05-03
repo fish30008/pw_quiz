@@ -505,7 +505,7 @@
             console.log(existingTexts)
             const merged = [...FALLBACK_QUESTIONS];
             
-            console.log(merged.length)
+           //console.log(merged.length)
 
             for (const item of jsonData) {
                 const q = {
@@ -516,10 +516,10 @@
                     c: item.c,
                     e: item.e || ''
                 };
-                if (true) {
-                    merged.push(q);
-                    existingTexts.add(q.q);
-                }
+            if (q.q && !existingTexts.has(q.q)) {
+            merged.push(q);
+            existingTexts.add(q.q);
+            }
             }
             ALL_QUESTIONS = merged;
             console.log(ALL_QUESTIONS.length)
